@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { todoAPI } from '../api/database';
 
 export interface Todo {
   id: string;
@@ -10,73 +11,121 @@ export interface Todo {
 
 export const useTodos = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load todos from localStorage on mount
+  // Load todos from database on mount
   useEffect(() => {
-    const savedTodos = localStorage.getItem('scribble-todos');
-    if (savedTodos) {
+    const loadTodos = async () => {
       try {
-        const parsedTodos = JSON.parse(savedTodos).map((todo: any) => ({
-          ...todo,
-          createdAt: new Date(todo.createdAt),
-        }));
-        setTodos(parsedTodos);
-      } catch (error) {
-        console.error('Error loading todos:', error);
+        setLoading(true);
+        const loadedTodos = await todoAPI.getAll();
+        setTodos(loadedTodos);
+        setError(null);
+      } catch (err) {
+        console.error('Error loading todos:', err);
+        setError('Failed to load todos');
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+
+    loadTodos();
   }, []);
 
-  // Save todos to localStorage whenever todos change
-  useEffect(() => {
-    localStorage.setItem('scribble-todos', JSON.stringify(todos));
-  }, [todos]);
-
-  const addTodo = (text: string, priority: 'low' | 'medium' | 'high') => {
-    const newTodo: Todo = {
-      id: Date.now().toString(),
-      text,
-      completed: false,
-      priority,
-      createdAt: new Date(),
-    };
-    setTodos(prev => [newTodo, ...prev]);
+  const addTodo = async (text: string, priority: 'low' | 'medium' | 'high') => {
+    try {
+      const newTodo: Omit<Todo, 'createdAt'> = {
+        id: Date.now().toString(),
+        text,
+        completed: false,
+        priority,
+      };
+      const created = await todoAPI.create(newTodo);
+      setTodos(prev => [created, ...prev]);
+      setError(null);
+    } catch (err) {
+      console.error('Error adding todo:', err);
+      setError('Failed to add todo');
+    }
   };
 
-  const toggleTodo = (id: string) => {
-    setTodos(prev =>
-      prev.map(todo =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
+  const toggleTodo = async (id: string) => {
+    try {
+      const todo = todos.find(t => t.id === id);
+      if (!todo) return;
+
+      const updated = await todoAPI.update(id, { completed: !todo.completed });
+      if (updated) {
+        setTodos(prev =>
+          prev.map(t => t.id === id ? updated : t)
+        );
+        setError(null);
+      }
+    } catch (err) {
+      console.error('Error toggling todo:', err);
+      setError('Failed to update todo');
+    }
   };
 
-  const deleteTodo = (id: string) => {
-    setTodos(prev => prev.filter(todo => todo.id !== id));
+  const deleteTodo = async (id: string) => {
+    try {
+      const success = await todoAPI.delete(id);
+      if (success) {
+        setTodos(prev => prev.filter(todo => todo.id !== id));
+        setError(null);
+      }
+    } catch (err) {
+      console.error('Error deleting todo:', err);
+      setError('Failed to delete todo');
+    }
   };
 
-  const editTodo = (id: string, newText: string) => {
-    setTodos(prev =>
-      prev.map(todo =>
-        todo.id === id ? { ...todo, text: newText } : todo
-      )
-    );
+  const editTodo = async (id: string, newText: string) => {
+    try {
+      const updated = await todoAPI.update(id, { text: newText });
+      if (updated) {
+        setTodos(prev =>
+          prev.map(todo => todo.id === id ? updated : todo)
+        );
+        setError(null);
+      }
+    } catch (err) {
+      console.error('Error editing todo:', err);
+      setError('Failed to edit todo');
+    }
   };
 
-  const changePriority = (id: string, priority: 'low' | 'medium' | 'high') => {
-    setTodos(prev =>
-      prev.map(todo =>
-        todo.id === id ? { ...todo, priority } : todo
-      )
-    );
+  const changePriority = async (id: string, priority: 'low' | 'medium' | 'high') => {
+    try {
+      const updated = await todoAPI.update(id, { priority });
+      if (updated) {
+        setTodos(prev =>
+          prev.map(todo => todo.id === id ? updated : todo)
+        );
+        setError(null);
+      }
+    } catch (err) {
+      console.error('Error changing priority:', err);
+      setError('Failed to change priority');
+    }
   };
 
-  const clearCompleted = () => {
-    setTodos(prev => prev.filter(todo => !todo.completed));
+  const clearCompleted = async () => {
+    try {
+      await todoAPI.clearCompleted();
+      setTodos(prev => prev.filter(todo => !todo.completed));
+      setError(null);
+    } catch (err) {
+      console.error('Error clearing completed todos:', err);
+      setError('Failed to clear completed todos');
+    }
   };
 
   return {
     todos,
+    loading,
+    error,
     addTodo,
     toggleTodo,
     deleteTodo,

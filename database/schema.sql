@@ -1,0 +1,25 @@
+-- SQLite Schema for Scribble Tasks
+-- This schema is optimized for SQLite (used in Electron apps)
+
+-- Todos table
+CREATE TABLE IF NOT EXISTS todos (
+    id TEXT PRIMARY KEY,
+    text TEXT NOT NULL,
+    completed INTEGER NOT NULL DEFAULT 0, -- SQLite uses INTEGER for boolean (0 = false, 1 = true)
+    priority TEXT NOT NULL DEFAULT 'medium' CHECK(priority IN ('low', 'medium', 'high')),
+    created_at TEXT NOT NULL DEFAULT (datetime('now')), -- ISO 8601 format
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Indexes for better query performance
+CREATE INDEX IF NOT EXISTS idx_todos_completed ON todos(completed);
+CREATE INDEX IF NOT EXISTS idx_todos_priority ON todos(priority);
+CREATE INDEX IF NOT EXISTS idx_todos_created_at ON todos(created_at);
+
+-- Trigger to update updated_at timestamp on row update
+CREATE TRIGGER IF NOT EXISTS update_todos_timestamp 
+AFTER UPDATE ON todos
+BEGIN
+    UPDATE todos SET updated_at = datetime('now') WHERE id = NEW.id;
+END;
+

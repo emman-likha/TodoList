@@ -14,87 +14,86 @@ const Stats: React.FC<StatsProps> = ({ todos, onClearCompleted }) => {
   const completionRate = totalTodos > 0 ? Math.round((completedTodos / totalTodos) * 100) : 0;
 
   return (
-    <div className="mb-6">
+    <div className="mb-8">
       <div
         className="
-          p-4 bg-green-50/80 border-2 border-dashed border-green-200 rounded-lg
-          transform rotate-[-0.2deg] hover:rotate-[0.1deg] transition-all duration-300
+          p-6 bg-green-50 scribble-border
+          transform rotate-[-0.3deg] transition-all duration-300
+          shadow-sm
         "
-        style={{
-          clipPath: 'polygon(2% 1%, 100% 0%, 98% 99%, 0% 100%)',
-        }}
       >
-        <div className="flex items-center gap-3 mb-3">
-          <CheckCircle className="text-green-500 w-5 h-5" />
-          <h3 className="text-lg font-handwritten text-gray-800">Progress</h3>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="text-green-600 w-6 h-6" />
+            <h3 className="text-xl font-handwritten text-gray-800 marker-highlight">Progress Tracker</h3>
+          </div>
+          {completedTodos > 0 && (
+            <button
+              onClick={onClearCompleted}
+              className="
+                flex items-center gap-2 px-4 py-1.5 text-red-500 hover:text-red-700
+                transition-colors font-handwritten text-lg border-2 border-dashed border-red-200
+                hover:border-red-300 rounded-lg bg-white/50
+              "
+            >
+              <Trash2 size={18} />
+              <span className="hidden sm:inline">Clear Done</span>
+            </button>
+          )}
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600 font-handwritten">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+          <div className="text-center group">
+            <div className="text-4xl font-bold text-blue-600 font-handwritten transition-transform group-hover:scale-110">
               {totalTodos}
             </div>
-            <div className="text-sm text-gray-600 flex items-center justify-center gap-1">
-              <Circle size={12} />
+            <div className="text-sm text-gray-500 font-handwritten uppercase tracking-wider mt-1">
               Total
             </div>
           </div>
           
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600 font-handwritten">
+          <div className="text-center group">
+            <div className="text-4xl font-bold text-green-600 font-handwritten transition-transform group-hover:scale-110">
               {completedTodos}
             </div>
-            <div className="text-sm text-gray-600 flex items-center justify-center gap-1">
-              <CheckCircle size={12} />
+            <div className="text-sm text-gray-500 font-handwritten uppercase tracking-wider mt-1">
               Done
             </div>
           </div>
           
-          <div className="text-center">
-            <div className="text-2xl font-bold text-orange-600 font-handwritten">
+          <div className="text-center group">
+            <div className="text-4xl font-bold text-orange-600 font-handwritten transition-transform group-hover:scale-110">
               {activeTodos}
             </div>
-            <div className="text-sm text-gray-600 flex items-center justify-center gap-1">
-              <Clock size={12} />
-              Active
+            <div className="text-sm text-gray-500 font-handwritten uppercase tracking-wider mt-1">
+              Left
             </div>
           </div>
           
-          <div className="text-center">
-            <div className="text-2xl font-bold text-purple-600 font-handwritten">
+          <div className="text-center group">
+            <div className="text-4xl font-bold text-purple-600 font-handwritten transition-transform group-hover:scale-110">
               {completionRate}%
             </div>
-            <div className="text-sm text-gray-600">
-              Complete
+            <div className="text-sm text-gray-500 font-handwritten uppercase tracking-wider mt-1">
+              Score
             </div>
           </div>
         </div>
         
-        {/* Progress bar */}
-        <div className="mt-4">
-          <div className="w-full bg-gray-200 rounded-full h-2">
+        {/* Progress bar - hand drawn look */}
+        <div className="mt-8 relative">
+          <div className="w-full bg-gray-200/50 rounded-full h-4 scribble-border p-[2px]">
             <div
-              className="bg-green-400 h-2 rounded-full transition-all duration-300"
+              className="bg-green-400 h-full rounded-full transition-all duration-1000 ease-out"
               style={{ width: `${completionRate}%` }}
             />
           </div>
+          {completionRate === 100 && totalTodos > 0 && (
+            <div className="absolute -top-6 right-0 text-yellow-500 font-handwritten text-lg animate-bounce">
+              Perfect! ✨
+            </div>
+          )}
         </div>
-        
-        {/* Clear completed button */}
-        {completedTodos > 0 && (
-          <div className="mt-4 flex justify-end">
-            <button
-              onClick={onClearCompleted}
-              className="
-                flex items-center gap-2 px-4 py-2 text-red-600 hover:text-red-700
-                hover:bg-red-50 rounded-lg transition-colors font-handwritten
-              "
-            >
-              <Trash2 size={16} />
-              Clear Completed ({completedTodos})
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

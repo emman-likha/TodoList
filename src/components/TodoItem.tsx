@@ -41,13 +41,13 @@ const TodoItem: React.FC<TodoItemProps> = ({
     }
   };
 
-  const priorityColors = {
-    low: 'bg-green-100 border-green-300',
-    medium: 'bg-yellow-100 border-yellow-300',
-    high: 'bg-red-100 border-red-300',
+  const priorityStyles = {
+    low: 'bg-green-50 border-green-200 text-green-800',
+    medium: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+    high: 'bg-red-50 border-red-200 text-red-800',
   };
 
-  const priorityDots = {
+  const priorityMarkers = {
     low: 'bg-green-400',
     medium: 'bg-yellow-400',
     high: 'bg-red-400',
@@ -56,95 +56,101 @@ const TodoItem: React.FC<TodoItemProps> = ({
   return (
     <div
       className={`
-        relative p-4 mb-3 rounded-lg border-2 border-dashed transition-all duration-300
-        hover:scale-105 hover:rotate-1 hover:shadow-lg
-        ${priorityColors[priority]}
-        ${completed ? 'opacity-60' : ''}
-        transform rotate-[-0.5deg] hover:rotate-[0.5deg]
+        relative p-4 sm:p-5 mb-1 bg-white scribble-border transition-all duration-300
+        hover:scale-[1.02] hover:-rotate-1 group
+        ${completed ? 'opacity-70 bg-gray-50' : 'shadow-sm hover:shadow-md'}
+        transform rotate-[0.2deg]
       `}
-      style={{
-        clipPath: 'polygon(2% 0%, 98% 2%, 100% 98%, 0% 96%)',
-      }}
     >
-      {/* Priority indicator */}
-      <div className={`absolute top-2 right-2 w-3 h-3 rounded-full ${priorityDots[priority]}`} />
-      
-      <div className="flex items-center gap-3">
-        {/* Checkbox */}
-        <button
-          onClick={() => onToggle(id)}
-          className={`
-            relative w-6 h-6 rounded-full border-2 border-gray-400 transition-all duration-200
-            hover:scale-110 hover:border-gray-600
-            ${completed ? 'bg-green-400 border-green-400' : 'bg-white'}
-          `}
-        >
-          {completed && (
-            <Check className="absolute inset-0 w-4 h-4 text-white m-auto animate-bounce" />
-          )}
-        </button>
-
-        {/* Text content */}
-        <div className="flex-1">
-          {isEditing ? (
-            <input
-              type="text"
-              value={editText}
-              onChange={(e) => setEditText(e.target.value)}
-              onBlur={handleEdit}
-              onKeyDown={handleKeyPress}
-              className="w-full px-2 py-1 bg-white/80 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
-              autoFocus
-            />
-          ) : (
-            <span
-              className={`
-                text-gray-800 font-handwritten text-lg
-                ${completed ? 'line-through text-gray-500' : ''}
-              `}
-            >
-              {text}
-            </span>
-          )}
-        </div>
-
-        {/* Action buttons */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => setIsEditing(true)}
-            className="p-1 text-gray-500 hover:text-blue-500 transition-colors"
-            title="Edit"
-          >
-            <Edit3 size={16} />
-          </button>
-          
-          <button
-            onClick={() => onDelete(id)}
-            className="p-1 text-gray-500 hover:text-red-500 transition-colors"
-            title="Delete"
-          >
-            <X size={16} />
-          </button>
-        </div>
+      {/* Priority Tape */}
+      <div className={`
+        absolute -top-2 left-6 px-3 py-0.5 text-[10px] uppercase tracking-widest font-bold
+        transform -rotate-2 shadow-sm z-10 font-handwritten
+        ${priorityMarkers[priority]} text-white
+      `}>
+        {priority}
       </div>
-
-      {/* Priority selector */}
-      <div className="mt-2 flex gap-2">
-        {(['low', 'medium', 'high'] as const).map((p) => (
+      
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex items-center gap-4 flex-1">
+          {/* Checkbox */}
           <button
-            key={p}
-            onClick={() => onPriorityChange(id, p)}
+            onClick={() => onToggle(id)}
             className={`
-              px-2 py-1 text-xs rounded-full border transition-all
-              ${priority === p 
-                ? 'bg-gray-800 text-white border-gray-800' 
-                : 'bg-white/70 text-gray-600 border-gray-300 hover:bg-gray-100'
-              }
+              relative w-8 h-8 rounded-full border-2 border-dashed border-gray-400 transition-all duration-200
+              hover:scale-110 hover:border-gray-600 flex-shrink-0
+              ${completed ? 'bg-green-100 border-green-500' : 'bg-white'}
             `}
           >
-            {p}
+            {completed && (
+              <Check className="absolute inset-0 w-5 h-5 text-green-600 m-auto animate-in zoom-in duration-300" strokeWidth={3} />
+            )}
           </button>
-        ))}
+
+          {/* Text content */}
+          <div className="flex-1 min-w-0">
+            {isEditing ? (
+              <input
+                type="text"
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                onBlur={handleEdit}
+                onKeyDown={handleKeyPress}
+                className="w-full px-3 py-1 bg-yellow-50 border-2 border-dashed border-yellow-300 rounded focus:outline-none font-handwritten text-xl"
+                autoFocus
+              />
+            ) : (
+              <span
+                className={`
+                  block text-gray-800 font-handwritten text-xl sm:text-2xl break-words
+                  ${completed ? 'line-through decoration-2 decoration-gray-400 text-gray-500 italic' : 'marker-highlight'}
+                `}
+              >
+                {text}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Action buttons & Priority switcher */}
+        <div className="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-3 sm:pt-0 border-dashed border-gray-200">
+          <div className="flex gap-1">
+            {(['low', 'medium', 'high'] as const).map((p) => (
+              <button
+                key={p}
+                onClick={() => onPriorityChange(id, p)}
+                className={`
+                  w-6 h-6 rounded-full border-2 transition-all
+                  ${priority === p 
+                    ? `scale-110 ${priorityMarkers[p]} border-gray-800` 
+                    : `bg-white border-gray-200 hover:border-gray-300`
+                  }
+                `}
+                title={`Set ${p} priority`}
+              />
+            ))}
+          </div>
+
+          <div className="h-6 w-[2px] bg-gray-200 mx-1 hidden sm:block" />
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => setIsEditing(true)}
+              className="p-2 text-gray-400 hover:text-blue-500 transition-colors bg-gray-50 sm:bg-transparent rounded-full"
+              title="Edit scribble"
+            >
+              <Edit3 size={18} />
+            </button>
+            
+            <button
+              onClick={() => onDelete(id)}
+              className="p-2 text-gray-400 hover:text-red-500 transition-colors bg-gray-50 sm:bg-transparent rounded-full"
+              title="Discard scribble"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
