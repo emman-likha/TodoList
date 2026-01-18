@@ -7,7 +7,7 @@ declare global {
       todos: {
         getAll: () => Promise<Todo[]>;
         create: (todo: Omit<Todo, 'createdAt'>) => Promise<Todo>;
-        update: (id: string, updates: Partial<Pick<Todo, 'text' | 'completed' | 'priority'>>) => Promise<Todo | null>;
+        update: (id: string, updates: Partial<Pick<Todo, 'text' | 'completed' | 'deadline'>>) => Promise<Todo | null>;
         delete: (id: string) => Promise<boolean>;
         clearCompleted: () => Promise<number>;
       };
@@ -57,6 +57,7 @@ export const todoAPI = {
     const newTodo: Todo = {
       ...todo,
       createdAt: new Date(),
+      deadline: todo.deadline instanceof Date ? todo.deadline : todo.deadline ? new Date(todo.deadline) : null,
     };
     const todos = await this.getAll();
     todos.unshift(newTodo);
@@ -64,7 +65,7 @@ export const todoAPI = {
     return newTodo;
   },
 
-  async update(id: string, updates: Partial<Pick<Todo, 'text' | 'completed' | 'priority'>>): Promise<Todo | null> {
+  async update(id: string, updates: Partial<Pick<Todo, 'text' | 'completed' | 'deadline'>>): Promise<Todo | null> {
     if (isElectron()) {
       return window.electronAPI.todos.update(id, updates);
     }

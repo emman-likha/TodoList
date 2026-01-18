@@ -17,6 +17,23 @@ export const useBibleVerses = () => {
   const [error, setError] = useState<string | null>(null);
 
   /**
+   * Get verse of the day (changes daily)
+   */
+  const getVerseOfTheDay = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const verse = await bibleAPI.getVerseOfTheDay();
+      setCurrentVerse(verse);
+    } catch (err) {
+      console.error('Error getting verse of the day:', err);
+      setError('Failed to load verse');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
    * Get a random motivational verse
    */
   const getRandomVerse = async (category?: BibleVerse['category']) => {
@@ -81,6 +98,7 @@ export const useBibleVerses = () => {
     currentVerse,
     loading,
     error,
+    getVerseOfTheDay,
     getRandomVerse,
     getVersesByCategory,
     getVerseByReference,

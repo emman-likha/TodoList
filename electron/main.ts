@@ -79,10 +79,13 @@ app.whenReady().then(() => {
 // IPC Handlers for database operations
 ipcMain.handle('todos:getAll', async () => {
   try {
-    return todoService.getAllTodos();
+    const todos = todoService.getAllTodos();
+    console.log('Returning todos:', todos?.length || 0);
+    return todos;
   } catch (error) {
     console.error('Error getting todos:', error);
-    throw error;
+    // Return empty array instead of throwing to prevent app crash
+    return [];
   }
 });
 
@@ -95,7 +98,7 @@ ipcMain.handle('todos:create', async (_event, todo: Omit<Todo, 'createdAt'>) => 
   }
 });
 
-ipcMain.handle('todos:update', async (_event, id: string, updates: Partial<Pick<Todo, 'text' | 'completed' | 'priority'>>) => {
+ipcMain.handle('todos:update', async (_event, id: string, updates: Partial<Pick<Todo, 'text' | 'completed' | 'deadline'>>) => {
   try {
     return todoService.updateTodo(id, updates);
   } catch (error) {
@@ -123,6 +126,15 @@ ipcMain.handle('todos:clearCompleted', async () => {
 });
 
 // IPC Handlers for Bible verses
+ipcMain.handle('bible:getVerseOfTheDay', async () => {
+  try {
+    return bibleService.getVerseOfTheDay();
+  } catch (error) {
+    console.error('Error getting verse of the day:', error);
+    throw error;
+  }
+});
+
 ipcMain.handle('bible:getRandom', async (_event, category?: string) => {
   try {
     return bibleService.getRandomVerse(category as any);

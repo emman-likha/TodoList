@@ -5,7 +5,7 @@ export interface Todo {
   id: string;
   text: string;
   completed: boolean;
-  priority: 'low' | 'medium' | 'high';
+  deadline: Date | null;
   createdAt: Date;
 }
 
@@ -19,12 +19,14 @@ export const useTodos = () => {
     const loadTodos = async () => {
       try {
         setLoading(true);
-        const loadedTodos = await todoAPI.getAll();
-        setTodos(loadedTodos);
         setError(null);
+        const loadedTodos = await todoAPI.getAll();
+        console.log('Loaded todos:', loadedTodos);
+        setTodos(loadedTodos || []);
       } catch (err) {
         console.error('Error loading todos:', err);
         setError('Failed to load todos');
+        setTodos([]); // Set empty array on error
       } finally {
         setLoading(false);
       }
@@ -33,13 +35,13 @@ export const useTodos = () => {
     loadTodos();
   }, []);
 
-  const addTodo = async (text: string, priority: 'low' | 'medium' | 'high') => {
+  const addTodo = async (text: string, deadline: Date | null) => {
     try {
       const newTodo: Omit<Todo, 'createdAt'> = {
         id: Date.now().toString(),
         text,
         completed: false,
-        priority,
+        deadline,
       };
       const created = await todoAPI.create(newTodo);
       setTodos(prev => [created, ...prev]);
@@ -96,9 +98,9 @@ export const useTodos = () => {
     }
   };
 
-  const changePriority = async (id: string, priority: 'low' | 'medium' | 'high') => {
+  const updateDeadline = async (id: string, deadline: Date | null) => {
     try {
-      const updated = await todoAPI.update(id, { priority });
+      const updated = await todoAPI.update(id, { deadline });
       if (updated) {
         setTodos(prev =>
           prev.map(todo => todo.id === id ? updated : todo)
@@ -106,8 +108,8 @@ export const useTodos = () => {
         setError(null);
       }
     } catch (err) {
-      console.error('Error changing priority:', err);
-      setError('Failed to change priority');
+      console.error('Error updating deadline:', err);
+      setError('Failed to update deadline');
     }
   };
 
@@ -130,7 +132,7 @@ export const useTodos = () => {
     toggleTodo,
     deleteTodo,
     editTodo,
-    changePriority,
+    updateDeadline,
     clearCompleted,
   };
 };

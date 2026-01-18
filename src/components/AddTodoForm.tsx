@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
-import { Plus, Sparkles } from 'lucide-react';
+import { Plus, Sparkles, Calendar } from 'lucide-react';
 
 interface AddTodoFormProps {
-  onAdd: (text: string, priority: 'low' | 'medium' | 'high') => void;
+  onAdd: (text: string, deadline: Date | null) => void;
 }
 
 const AddTodoForm: React.FC<AddTodoFormProps> = ({ onAdd }) => {
   const [text, setText] = useState('');
-  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [deadline, setDeadline] = useState<string>('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (text.trim()) {
-      onAdd(text.trim(), priority);
+      const deadlineDate = deadline ? new Date(deadline) : null;
+      onAdd(text.trim(), deadlineDate);
       setText('');
-      setPriority('medium');
+      setDeadline('');
     }
   };
 
@@ -52,25 +53,28 @@ const AddTodoForm: React.FC<AddTodoFormProps> = ({ onAdd }) => {
             
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 font-handwritten">Importance:</span>
-                <div className="flex gap-1 flex-1">
-                  {(['low', 'medium', 'high'] as const).map((p) => (
-                    <button
-                      key={p}
-                      type="button"
-                      onClick={() => setPriority(p)}
-                      className={`
-                        flex-1 px-2 py-1 text-xs rounded-full border-2 transition-all font-handwritten
-                        ${priority === p 
-                          ? 'bg-gray-800 text-white border-gray-800 scale-105' 
-                          : 'bg-white/50 text-gray-600 border-gray-300 hover:border-gray-400'
-                        }
-                      `}
-                    >
-                      {p}
-                    </button>
-                  ))}
-                </div>
+                <Calendar className="text-blue-600 w-4 h-4 flex-shrink-0" />
+                <label className="text-sm text-gray-600 font-handwritten">Deadline:</label>
+                <input
+                  type="date"
+                  value={deadline}
+                  onChange={(e) => setDeadline(e.target.value)}
+                  className="
+                    flex-1 px-2 py-1 text-xs border-2 border-dashed border-gray-300 rounded-md
+                    focus:outline-none focus:border-blue-400 font-handwritten
+                    bg-white/50 text-gray-700
+                  "
+                />
+                {deadline && (
+                  <button
+                    type="button"
+                    onClick={() => setDeadline('')}
+                    className="px-2 py-1 text-xs text-red-500 hover:text-red-700 font-handwritten"
+                    title="Clear deadline"
+                  >
+                    Clear
+                  </button>
+                )}
               </div>
               
               <button

@@ -17,6 +17,44 @@ export interface BibleVerseReference {
 }
 
 /**
+ * Get verse of the day - changes daily based on date
+ * Uses the day of year (1-365) to select a consistent verse for each day
+ */
+export function getVerseOfTheDay(): BibleVerse | null {
+  const db = getDatabase();
+  
+  // Get day of year (1-365/366)
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now.getTime() - start.getTime();
+  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+  
+  // Get total count of verses
+  const countStmt = db.prepare('SELECT COUNT(*) as count FROM bible_verses');
+  const count = (countStmt.get() as any).count;
+  
+  if (count === 0) return null;
+  
+  // Use modulo to get a consistent verse for this day
+  const verseIndex = dayOfYear % count;
+  
+  const stmt = db.prepare('SELECT * FROM bible_verses LIMIT 1 OFFSET ?');
+  const row = stmt.get(verseIndex) as any;
+  
+  if (!row) return null;
+  
+  return {
+    id: row.id,
+    book: row.book,
+    chapter: row.chapter,
+    verse: row.verse,
+    verseText: row.verse_text,
+    category: row.category,
+    createdAt: new Date(row.created_at),
+  };
+}
+
+/**
  * Get a random motivational Bible verse
  */
 export function getRandomVerse(category?: BibleVerse['category']): BibleVerse | null {

@@ -6,8 +6,6 @@ interface FilterBarProps {
   onSearchChange: (term: string) => void;
   filter: 'all' | 'active' | 'completed';
   onFilterChange: (filter: 'all' | 'active' | 'completed') => void;
-  priorityFilter: 'all' | 'low' | 'medium' | 'high';
-  onPriorityFilterChange: (priority: 'all' | 'low' | 'medium' | 'high') => void;
 }
 
 const FilterBar: React.FC<FilterBarProps> = ({
@@ -15,13 +13,10 @@ const FilterBar: React.FC<FilterBarProps> = ({
   onSearchChange,
   filter,
   onFilterChange,
-  priorityFilter,
-  onPriorityFilterChange,
 }) => {
   const resetFilters = () => {
     onSearchChange('');
     onFilterChange('all');
-    onPriorityFilterChange('all');
   };
 
   return (
@@ -69,49 +64,25 @@ const FilterBar: React.FC<FilterBarProps> = ({
             />
           </div>
           
-          <div className="flex flex-col gap-4">
-            {/* Status Filter */}
-            <div className="space-y-1">
-              <span className="text-xs font-handwritten text-gray-500 ml-1">Status:</span>
-              <div className="flex p-1 bg-gray-200/50 rounded-lg scribble-border">
-                {(['all', 'active', 'completed'] as const).map((f) => (
-                  <button
-                    key={f}
-                    onClick={() => onFilterChange(f)}
-                    className={`
-                      flex-1 py-1.5 text-xs rounded-md transition-all font-handwritten
-                      ${filter === f 
-                        ? 'bg-purple-500 text-white shadow-md transform -rotate-1' 
-                        : 'text-gray-600 hover:bg-white/50'
-                      }
-                    `}
-                  >
-                    {f}
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            {/* Priority Filter */}
-            <div className="space-y-1">
-              <span className="text-xs font-handwritten text-gray-500 ml-1">Priority:</span>
-              <div className="flex p-1 bg-gray-200/50 rounded-lg scribble-border">
-                {(['all', 'low', 'medium', 'high'] as const).map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => onPriorityFilterChange(p)}
-                    className={`
-                      flex-1 py-1.5 text-xs rounded-md transition-all font-handwritten
-                      ${priorityFilter === p 
-                        ? 'bg-gray-800 text-white shadow-md transform rotate-1' 
-                        : 'text-gray-600 hover:bg-white/50'
-                      }
-                    `}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
+          {/* Status Filter */}
+          <div className="space-y-1">
+            <span className="text-xs font-handwritten text-gray-500 ml-1">Status:</span>
+            <div className="flex p-1 bg-gray-200/50 rounded-lg scribble-border">
+              {(['all', 'active', 'completed'] as const).map((f) => (
+                <button
+                  key={f}
+                  onClick={() => onFilterChange(f)}
+                  className={`
+                    flex-1 py-1.5 text-xs rounded-md transition-all font-handwritten
+                    ${filter === f 
+                      ? 'bg-purple-500 text-white shadow-md transform -rotate-1' 
+                      : 'text-gray-600 hover:bg-white/50'
+                    }
+                  `}
+                >
+                  {f}
+                </button>
+              ))}
             </div>
           </div>
         </div>

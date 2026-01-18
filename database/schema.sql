@@ -6,14 +6,14 @@ CREATE TABLE IF NOT EXISTS todos (
     id TEXT PRIMARY KEY,
     text TEXT NOT NULL,
     completed INTEGER NOT NULL DEFAULT 0, -- SQLite uses INTEGER for boolean (0 = false, 1 = true)
-    priority TEXT NOT NULL DEFAULT 'medium' CHECK(priority IN ('low', 'medium', 'high')),
+    deadline TEXT, -- ISO 8601 format date (nullable)
     created_at TEXT NOT NULL DEFAULT (datetime('now')), -- ISO 8601 format
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 -- Indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_todos_completed ON todos(completed);
-CREATE INDEX IF NOT EXISTS idx_todos_priority ON todos(priority);
+CREATE INDEX IF NOT EXISTS idx_todos_deadline ON todos(deadline);
 CREATE INDEX IF NOT EXISTS idx_todos_created_at ON todos(created_at);
 
 -- Trigger to update updated_at timestamp on row update

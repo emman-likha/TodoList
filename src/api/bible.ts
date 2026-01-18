@@ -26,6 +26,23 @@ export const isElectron = () => {
  * Bible Verses API
  */
 export const bibleAPI = {
+  async getVerseOfTheDay(): Promise<BibleVerse | null> {
+    if (isElectron()) {
+      return window.electronAPI.bible.getVerseOfTheDay();
+    }
+    
+    // Fallback: return a default verse if not in Electron
+    return {
+      id: 1,
+      book: 'Philippians',
+      chapter: 4,
+      verse: 13,
+      verseText: 'I can do all this through him who gives me strength.',
+      category: 'strength',
+      createdAt: new Date(),
+    };
+  },
+
   async getRandom(category?: BibleVerse['category']): Promise<BibleVerse | null> {
     if (isElectron()) {
       return window.electronAPI.bible.getRandom(category);

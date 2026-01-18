@@ -81,13 +81,13 @@ function initializeSchema(database: any) {
         id TEXT PRIMARY KEY,
         text TEXT NOT NULL,
         completed INTEGER NOT NULL DEFAULT 0,
-        priority TEXT NOT NULL DEFAULT 'medium' CHECK(priority IN ('low', 'medium', 'high')),
+        deadline TEXT,
         created_at TEXT NOT NULL DEFAULT (datetime('now')),
         updated_at TEXT NOT NULL DEFAULT (datetime('now'))
       );
       
       CREATE INDEX IF NOT EXISTS idx_todos_completed ON todos(completed);
-      CREATE INDEX IF NOT EXISTS idx_todos_priority ON todos(priority);
+      CREATE INDEX IF NOT EXISTS idx_todos_deadline ON todos(deadline);
       CREATE INDEX IF NOT EXISTS idx_todos_created_at ON todos(created_at);
       
       CREATE TRIGGER IF NOT EXISTS update_todos_timestamp 
@@ -97,6 +97,28 @@ function initializeSchema(database: any) {
       END;
     `;
     database.exec(inlineSchema);
+    
+    // Migrate existing database if it has priority column
+    try {
+      const tableInfo = database.prepare("PRAGMA table_info(todos)").all() as any[];
+      const hasPriority = tableInfo.some(col => col.name === 'priority');
+      const hasDeadline = tableInfo.some(col => col.name === 'deadline');
+      
+      if (hasPriority && !hasDeadline) {
+        console.log('Migrating database: Adding deadline column and removing priority...');
+        // Add deadline column
+        database.exec('ALTER TABLE todos ADD COLUMN deadline TEXT');
+        // Drop old index
+        database.exec('DROP INDEX IF EXISTS idx_todos_priority');
+        // Create new index
+        database.exec('CREATE INDEX IF NOT EXISTS idx_todos_deadline ON todos(deadline)');
+        // Note: SQLite doesn't support DROP COLUMN, so priority will remain but be ignored
+        console.log('Migration complete: deadline column added');
+      }
+    } catch (error) {
+      console.error('Error during migration:', error);
+    }
+    
     return;
   }
   
@@ -104,6 +126,26 @@ function initializeSchema(database: any) {
   
   // Execute schema (better-sqlite3 handles multiple statements)
   database.exec(schema);
+  
+  // Migrate existing database if it has priority column
+  try {
+    const tableInfo = database.prepare("PRAGMA table_info(todos)").all() as any[];
+    const hasPriority = tableInfo.some(col => col.name === 'priority');
+    const hasDeadline = tableInfo.some(col => col.name === 'deadline');
+    
+    if (hasPriority && !hasDeadline) {
+      console.log('Migrating database: Adding deadline column...');
+      // Add deadline column
+      database.exec('ALTER TABLE todos ADD COLUMN deadline TEXT');
+      // Drop old index
+      database.exec('DROP INDEX IF EXISTS idx_todos_priority');
+      // Create new index
+      database.exec('CREATE INDEX IF NOT EXISTS idx_todos_deadline ON todos(deadline)');
+      console.log('Migration complete: deadline column added');
+    }
+  } catch (error) {
+    console.error('Error during migration:', error);
+  }
 }
 
 /**

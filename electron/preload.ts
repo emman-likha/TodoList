@@ -18,13 +18,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   todos: {
     getAll: (): Promise<Todo[]> => ipcRenderer.invoke('todos:getAll'),
     create: (todo: Omit<Todo, 'createdAt'>): Promise<Todo> => ipcRenderer.invoke('todos:create', todo),
-    update: (id: string, updates: Partial<Pick<Todo, 'text' | 'completed' | 'priority'>>): Promise<Todo | null> => 
+    update: (id: string, updates: Partial<Pick<Todo, 'text' | 'completed' | 'deadline'>>): Promise<Todo | null> => 
       ipcRenderer.invoke('todos:update', id, updates),
     delete: (id: string): Promise<boolean> => ipcRenderer.invoke('todos:delete', id),
     clearCompleted: (): Promise<number> => ipcRenderer.invoke('todos:clearCompleted'),
   },
   // Bible verses operations
   bible: {
+    getVerseOfTheDay: (): Promise<BibleVerse | null> => ipcRenderer.invoke('bible:getVerseOfTheDay'),
     getRandom: (category?: string): Promise<BibleVerse | null> => ipcRenderer.invoke('bible:getRandom', category),
     getByCategory: (category: string): Promise<BibleVerse[]> => ipcRenderer.invoke('bible:getByCategory', category),
     getByReference: (reference: { book: string; chapter: number; verse: number }): Promise<BibleVerse | null> => 
