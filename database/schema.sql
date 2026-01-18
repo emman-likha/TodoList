@@ -23,3 +23,19 @@ BEGIN
     UPDATE todos SET updated_at = datetime('now') WHERE id = NEW.id;
 END;
 
+-- Bible Verses table for motivational content
+CREATE TABLE IF NOT EXISTS bible_verses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    book TEXT NOT NULL,
+    chapter INTEGER NOT NULL,
+    verse INTEGER NOT NULL,
+    verse_text TEXT NOT NULL,
+    category TEXT NOT NULL DEFAULT 'motivation' CHECK(category IN ('motivation', 'encouragement', 'strength', 'peace', 'hope', 'perseverance')),
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(book, chapter, verse)
+);
+
+-- Indexes for better query performance
+CREATE INDEX IF NOT EXISTS idx_bible_verses_category ON bible_verses(category);
+CREATE INDEX IF NOT EXISTS idx_bible_verses_book ON bible_verses(book);
+

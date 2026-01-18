@@ -16,7 +16,20 @@ await build({
   target: 'node18',
   format: 'esm',
   outfile: join(__dirname, '../dist-electron/main.js'),
-  external: ['electron'],
+  external: [
+    'electron',
+    'better-sqlite3',
+    'fs',
+    'path',
+    'url',
+    'os',
+    'crypto',
+    'util',
+    'stream',
+    'events',
+    'buffer',
+    'process',
+  ],
   sourcemap: !isProduction,
   minify: isProduction,
 });
@@ -34,21 +47,7 @@ await build({
   minify: isProduction,
 });
 
-// Build database files
-await build({
-  entryPoints: [
-    join(__dirname, '../database/db.ts'),
-    join(__dirname, '../database/todoService.ts'),
-  ],
-  bundle: true,
-  platform: 'node',
-  target: 'node18',
-  format: 'esm',
-  outdir: join(__dirname, '../dist-electron/database'),
-  external: ['electron', 'better-sqlite3'],
-  sourcemap: !isProduction,
-  minify: isProduction,
-});
+// Note: Database files are bundled into main.js, no need to build separately
 
 // Copy schema.sql to dist-electron
 const distElectronDir = join(__dirname, '../dist-electron');

@@ -3,6 +3,7 @@ import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { getDatabase, closeDatabase } from '../database/db';
 import * as todoService from '../database/todoService';
+import * as bibleService from '../database/bibleService';
 import type { Todo } from '../src/hooks/useTodos';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -71,7 +72,7 @@ app.on('window-all-closed', () => {
 
 // Initialize database when app is ready
 app.whenReady().then(() => {
-  // Initialize database connection
+  // Initialize database connection (seeding happens automatically in db.ts)
   getDatabase();
 });
 
@@ -117,6 +118,52 @@ ipcMain.handle('todos:clearCompleted', async () => {
     return todoService.deleteCompletedTodos();
   } catch (error) {
     console.error('Error clearing completed todos:', error);
+    throw error;
+  }
+});
+
+// IPC Handlers for Bible verses
+ipcMain.handle('bible:getRandom', async (_event, category?: string) => {
+  try {
+    return bibleService.getRandomVerse(category as any);
+  } catch (error) {
+    console.error('Error getting random verse:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('bible:getByCategory', async (_event, category: string) => {
+  try {
+    return bibleService.getVersesByCategory(category as any);
+  } catch (error) {
+    console.error('Error getting verses by category:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('bible:getByReference', async (_event, reference: { book: string; chapter: number; verse: number }) => {
+  try {
+    return bibleService.getVerseByReference(reference);
+  } catch (error) {
+    console.error('Error getting verse by reference:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('bible:getAll', async () => {
+  try {
+    return bibleService.getAllVerses();
+  } catch (error) {
+    console.error('Error getting all verses:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('bible:add', async (_event, verse: Omit<bibleService.BibleVerse, 'id' | 'createdAt'>) => {
+  try {
+    return bibleService.addVerse(verse);
+  } catch (error) {
+    console.error('Error adding verse:', error);
     throw error;
   }
 });
